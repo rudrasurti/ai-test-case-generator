@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-test-case-generator"
+version = "1.0.0"
+description = "Generate test cases, Robot Framework skeletons and Gherkin from user stories and OpenAPI specs with Claude"
+authors = [{name = "Rudra Surti"}]
+requires-python = ">=3.10"
+dependencies = ["anthropic>=0.40"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "robotframework>=7"]
+
+[project.scripts]
+testgen = "testgen.cli:main"
+
+[tool.setuptools]
+packages = ["testgen"]
