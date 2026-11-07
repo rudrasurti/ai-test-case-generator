@@ -1,0 +1,38 @@
+name: Generate test cases with Claude
+
+on:
+  workflow_dispatch:
+    inputs:
+      input:
+        description: Path to a user story or OpenAPI file in this repo
+        default: examples/login_story.md
+      max_cases:
+        description: Maximum number of test cases
+        default: "12"
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then echo "::error::Add the ANTHROPIC_API_KEY repository secret first"; exit 1; fi
+          mkdir -p out
+          testgen --input "${{ inputs.input }}" --max-cases ${{ inputs.max_cases }} --save-json out/cases.json --format md --out out/cases.md
+          for f in robot gherkin csv; do testgen --from-json out/cases.json --format $f --out out/cases.$f; done
+          cat out/cases.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: generated-test-cases
+          path: out/
