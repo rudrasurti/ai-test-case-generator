@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Booking API
+  version: "1.0"
+paths:
+  /booking:
+    post:
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firstname, lastname, totalprice, depositpaid, bookingdates]
+              properties:
+                firstname: {type: string, minLength: 1}
+                lastname: {type: string, minLength: 1}
+                totalprice: {type: integer, minimum: 0}
+                depositpaid: {type: boolean}
+                bookingdates:
+                  type: object
+                  properties:
+                    checkin: {type: string, format: date}
+                    checkout: {type: string, format: date}
+      responses:
+        "200": {description: Booking created}
+        "400": {description: Invalid body}
+  /booking/{id}:
+    delete:
+      summary: Delete a booking (needs auth token cookie)
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: integer}}
+      responses:
+        "201": {description: Deleted}
+        "403": {description: Missing or invalid token}

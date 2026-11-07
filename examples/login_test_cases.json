@@ -1,0 +1,23 @@
+{
+  "feature": "Login",
+  "test_cases": [
+    {"id": "TC-001", "title": "Log in with valid email and password", "type": "positive", "priority": "high",
+     "preconditions": "A registered user exists", "steps": ["Open the login page", "Enter a valid email and password", "Click Log in"],
+     "expected": "The My orders page is shown"},
+    {"id": "TC-002", "title": "Reject empty email and password", "type": "negative", "priority": "high",
+     "preconditions": "", "steps": ["Open the login page", "Leave both fields empty", "Click Log in"],
+     "expected": "Both fields show a required-field error"},
+    {"id": "TC-003", "title": "Accept a password of exactly 8 characters", "type": "boundary", "priority": "medium",
+     "preconditions": "User's password is 8 characters long", "steps": ["Enter the email", "Enter the 8-character password", "Click Log in"],
+     "expected": "Login succeeds"},
+    {"id": "TC-004", "title": "Reject a password of 65 characters", "type": "boundary", "priority": "medium",
+     "preconditions": "", "steps": ["Enter a valid email", "Enter a 65-character password", "Click Log in"],
+     "expected": "A password length error is shown"},
+    {"id": "TC-005", "title": "Lock the account after 5 wrong passwords", "type": "security", "priority": "high",
+     "preconditions": "A registered user exists", "steps": ["Enter the email with a wrong password 5 times", "Enter the correct password"],
+     "expected": "Login is refused and the account stays locked for 15 minutes"},
+    {"id": "TC-006", "title": "Use the same error for unknown email and wrong password", "type": "security", "priority": "high",
+     "preconditions": "", "steps": ["Log in with an unknown email", "Log in with a known email and wrong password", "Compare the messages"],
+     "expected": "Both attempts show the same generic error"}
+  ]
+}
