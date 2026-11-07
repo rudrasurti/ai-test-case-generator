@@ -1,0 +1,7 @@
+ID,Title,Type,Priority,Preconditions,Steps,Expected
+TC-001,Log in with valid email and password,positive,high,A registered user exists,Open the login page | Enter a valid email and password | Click Log in,The My orders page is shown
+TC-002,Reject empty email and password,negative,high,,Open the login page | Leave both fields empty | Click Log in,Both fields show a required-field error
+TC-003,Accept a password of exactly 8 characters,boundary,medium,User's password is 8 characters long,Enter the email | Enter the 8-character password | Click Log in,Login succeeds
+TC-004,Reject a password of 65 characters,boundary,medium,,Enter a valid email | Enter a 65-character password | Click Log in,A password length error is shown
+TC-005,Lock the account after 5 wrong passwords,security,high,A registered user exists,Enter the email with a wrong password 5 times | Enter the correct password,Login is refused and the account stays locked for 15 minutes
+TC-006,Use the same error for unknown email and wrong password,security,high,,Log in with an unknown email | Log in with a known email and wrong password | Compare the messages,Both attempts show the same generic error
