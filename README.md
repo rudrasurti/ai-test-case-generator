@@ -6,6 +6,8 @@ My own AI assistant for test design, built on **Claude**. Give it a user story, 
 
 AI writes the first draft; the tester reviews and owns the quality. The tool is built for that: output is validated, de-duplicated and saved as JSON so you can edit it and re-export without another API call.
 
+![How it works: story or spec, Claude, check, export](docs/how_it_works.png)
+
 ## Example
 
 Input: [`examples/login_story.md`](examples/login_story.md), a login story with 5 acceptance criteria.
