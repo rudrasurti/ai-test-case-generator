@@ -93,4 +93,51 @@ def to_playwright(data: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-EXPORTERS = {"md": to_markdown, "csv": to_csv, "robot": to_robot, "gherkin": to_gherkin, "playwright": to_playwright}
+def _pascal(text) -> str:
+    words = re.findall(r"[A-Za-z0-9]+", str(text))
+    return "".join(w[:1].upper() + w[1:] for w in words)
+
+
+def _java_string(text) -> str:
+    return _one_line(text).replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _java_tests(data: dict, driver_import: str, driver_decl: str) -> str:
+    cls = (_pascal(data["feature"]) or "Generated") + "Test"
+    if cls[0].isdigit():
+        cls = "Test" + cls
+    lines = ["import org.testng.SkipException;", "import org.testng.annotations.Test;", driver_import, "",
+             f"// Generated test cases for {_one_line(data['feature'])}.",
+             "// Implement each test, then remove the SkipException.", "",
+             f"public class {cls} {{", f"    {driver_decl}", ""]
+    for tc in data["test_cases"]:
+        method = "test" + re.sub(r"[^A-Za-z0-9]", "", str(tc["id"])) + _pascal(tc["title"])
+        lines.append(f"    @Test(groups = {{\"{tc['type']}\", \"{tc['priority']}\"}}, "
+                     f"description = \"{_java_string(tc['id'] + ' ' + tc['title'])}\")")
+        lines.append(f"    public void {method}() {{")
+        if tc["preconditions"]:
+            lines.append(f"        // Given: {_one_line(tc['preconditions'])}")
+        for i, step in enumerate(tc["steps"], 1):
+            lines.append(f"        // Step {i}: {_one_line(step)}")
+        lines.append(f"        // Expected: {_one_line(tc['expected'])}")
+        lines.append('        throw new SkipException("TODO: implement this test");')
+        lines.append("    }")
+        lines.append("")
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def to_selenium(data: dict) -> str:
+    """Selenium (Java, TestNG) skeleton: one test method per case, steps as comments."""
+    return _java_tests(data, "import org.openqa.selenium.WebDriver;",
+                       "private WebDriver driver; // TODO: create it in a @BeforeMethod")
+
+
+def to_appium(data: dict) -> str:
+    """Appium (Java, TestNG) skeleton: one test method per case, steps as comments."""
+    return _java_tests(data, "import io.appium.java_client.AppiumDriver;",
+                       "private AppiumDriver driver; // TODO: create it in a @BeforeMethod")
+
+
+EXPORTERS = {"md": to_markdown, "csv": to_csv, "robot": to_robot, "gherkin": to_gherkin, "playwright": to_playwright,
+             "selenium": to_selenium, "appium": to_appium}
