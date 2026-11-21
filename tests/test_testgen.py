@@ -82,3 +82,20 @@ def test_cli_from_json_writes_file(tmp_path):
 def test_cli_dry_run_prints_prompt(capsys):
     assert cli.main(["--input", str(ROOT / "examples" / "login_story.md"), "--dry-run"]) == 0
     assert "locked for 15 minutes" in capsys.readouterr().out
+
+
+def test_playwright_export_has_one_fixme_test_per_case():
+    data = json.loads(SAMPLE)
+    out = EXPORTERS["playwright"](data)
+    assert out.startswith("import { test, expect } from '@playwright/test';")
+    assert out.count("test.fixme('") == len(data["test_cases"])
+    assert out.rstrip().endswith("});")
+
+
+def test_playwright_export_escapes_single_quotes():
+    data = {"feature": "User's login", "test_cases": [
+        {"id": "TC-001", "title": "Don't lock a valid user", "type": "positive", "priority": "high",
+         "preconditions": "", "steps": ["Open login"], "expected": "Orders page is shown"}]}
+    out = EXPORTERS["playwright"](data)
+    assert "test.describe('User\\'s login'" in out
+    assert "Don\\'t lock a valid user" in out
