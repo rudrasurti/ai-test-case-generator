@@ -62,4 +62,35 @@ def to_gherkin(data: dict) -> str:
     return "\n".join(lines)
 
 
-EXPORTERS = {"md": to_markdown, "csv": to_csv, "robot": to_robot, "gherkin": to_gherkin}
+def _one_line(text) -> str:
+    return " ".join(str(text).split())
+
+
+def _ts_string(text) -> str:
+    return _one_line(text).replace("\\", "\\\\").replace("'", "\\'")
+
+
+def to_playwright(data: dict) -> str:
+    """Playwright (TypeScript) skeleton: one test per case, steps as comments to implement."""
+    feature = _ts_string(data["feature"])
+    lines = ["import { test, expect } from '@playwright/test';", "",
+             f"// Generated test cases for {_one_line(data['feature'])}.",
+             "// Each test is marked fixme: implement the steps, then change test.fixme to test.", "",
+             f"test.describe('{feature}', () => {{"]
+    for tc in data["test_cases"]:
+        title = _ts_string(f"{tc['id']} {tc['title']}")
+        lines.append(f"  test.fixme('{title}', {{ tag: ['@{tc['type']}', '@{tc['priority']}'] }}, async ({{ page }}) => {{")
+        if tc["preconditions"]:
+            lines.append(f"    // Given: {_one_line(tc['preconditions'])}")
+        lines.append("    await page.goto('/'); // TODO: open the start page")
+        for i, step in enumerate(tc["steps"], 1):
+            lines.append(f"    // Step {i}: {_one_line(step)}")
+        lines.append(f"    // Expected: {_one_line(tc['expected'])}")
+        lines.append("    // await expect(page.getByRole(...)).toBeVisible();")
+        lines.append("  });")
+        lines.append("")
+    lines.append("});")
+    return "\n".join(lines) + "\n"
+
+
+EXPORTERS = {"md": to_markdown, "csv": to_csv, "robot": to_robot, "gherkin": to_gherkin, "playwright": to_playwright}
